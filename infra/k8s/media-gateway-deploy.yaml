@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: media-gateway
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: media-gateway
+  template:
+    metadata:
+      labels:
+        app: media-gateway
+    spec:
+      containers:
+        - name: media-gateway
+          image: your-registry/media-gateway:latest
+          ports:
+            - containerPort: 8010
+            - containerPort: 5004
+              protocol: UDP
+          envFrom:
+            - secretRef:
+                name: voice-ai-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: media-gateway
+spec:
+  selector:
+    app: media-gateway
+  ports:
+    - name: http
+      port: 8010
+      targetPort: 8010
+    - name: rtp
+      protocol: UDP
+      port: 5004
+      targetPort: 5004
