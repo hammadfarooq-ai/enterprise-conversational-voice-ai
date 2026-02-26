@@ -40,10 +40,12 @@ async def health():
 
 
 @app.post("/calls/{call_id}/bridge/start")
-async def start_bridge(call_id: str):
+async def start_bridge(call_id: str, asterisk_rtp_host: str | None = None, asterisk_rtp_port: int | None = None):
     global bridge_task
     if bridge_task and not bridge_task.done():
         return {"ok": False, "message": "bridge already running"}
     bridge = WSBridge(settings.media_orch_ws_url)
-    bridge_task = asyncio.create_task(bridge.run_call_bridge(call_id, rtp_queue))
+    bridge_task = asyncio.create_task(
+        bridge.run_call_bridge(call_id, rtp_queue, asterisk_rtp_host, asterisk_rtp_port)
+    )
     return {"ok": True, "call_id": call_id}
